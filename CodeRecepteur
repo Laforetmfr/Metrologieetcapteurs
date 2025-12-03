@@ -1,0 +1,31 @@
+const int relayPin = 4; // adapte si besoin
+
+void setup() {
+  Serial.begin(9600);
+  Serial1.begin(9600);
+  pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);
+  Serial.println("Receiver ready");
+}
+
+void loop() {
+  if (Serial1.available()) {
+    String data = Serial1.readStringUntil('\n');
+    int sep = data.indexOf(',');
+    if (sep > 0) {
+      float temperature = data.substring(0, sep).toFloat();
+      float consigne = data.substring(sep + 1).toFloat();
+      Serial.print("Recieved -> Temp: ");
+      Serial.print(temperature, 2);
+      Serial.print(" | Cons: ");
+      Serial.println(consigne, 2);
+
+      // Commande relais (exemple simple)
+      if (temperature > consigne) digitalWrite(relayPin, HIGH);
+      else digitalWrite(relayPin, LOW);
+    } else {
+      Serial.print("Bad data: ");
+      Serial.println(data);
+    }
+  }
+}
