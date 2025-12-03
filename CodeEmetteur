@@ -1,0 +1,39 @@
+#include <math.h>
+
+const int B = 4275;
+const int R0 = 100000;
+const int pinTempSensor = A0;
+const int pinPot = A1;
+const float minTemp = 5.0;
+const float maxTemp = 35.0;
+const float stepTemp = 0.5;
+
+void setup() {
+  Serial.begin(9600);
+  Serial1.begin(9600);   // Zigbee sur 0/1
+  Serial.println("Emitteur prêt");
+}
+
+void loop() {
+  int a = analogRead(pinTempSensor);
+  float R = 1023.0 / a - 1.0;
+  R = R0 / R;
+  float temperature = 1.0 / (log(R / R0) / B + 1 / 298.15) - 273.15;
+
+  int potValue = analogRead(pinPot);
+  float consigne = minTemp + ((float)potValue / 1023.0) * (maxTemp - minTemp);
+  consigne = round(consigne / stepTemp) * stepTemp;
+
+  // Envoi via Zigbee
+  Serial1.print(temperature, 2);
+  Serial1.print(",");
+  Serial1.println(consigne, 2);
+
+  // Debug USB
+  Serial.print("Sent -> ");
+  Serial.print(temperature, 2);
+  Serial.print(",");
+  Serial.println(consigne, 2);
+
+  delay(1000);
+}
